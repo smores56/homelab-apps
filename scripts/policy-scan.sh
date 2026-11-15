@@ -204,8 +204,8 @@ for claim in "${claims[@]}"; do
   grep -qE "^  name: ${claim}$" "$root/apps/nanobot/pvc.yaml" ||
     note "claim $claim is not declared in apps/nanobot/pvc.yaml"
 done
-grep -qF 'mountPath: /data/home/tools' "$root/apps/nanobot/deployment.yaml" ||
-  note "deployment does not mount nanobot-tools at /data/home/tools"
+grep -qF 'mountPath: /data/tools' "$root/apps/nanobot/deployment.yaml" ||
+  note "deployment does not mount nanobot-tools at /data/tools"
 
 # Every env var is reviewed. A key outside the allowlist widens the agent's reach
 # (a proxy, a credential path, a second state root) in a diff nobody reads.
@@ -228,8 +228,8 @@ fi
 # The install roots are all on nanobot-tools, and TMPDIR is on the scratch PVC.
 for key in UV_TOOL_DIR UV_TOOL_BIN_DIR PYTHONUSERBASE NPM_CONFIG_PREFIX CARGO_HOME GOPATH; do
   grep -A1 -E "^ +- name: ${key}\$" "$root/apps/nanobot/deployment.yaml" |
-    grep -qF 'value: /data/home/tools/' ||
-    note "$key does not point into /data/home/tools"
+    grep -qF 'value: /data/tools/' ||
+    note "$key does not point into /data/tools"
 done
 grep -A1 -E '^ +- name: TMPDIR$' "$root/apps/nanobot/deployment.yaml" |
   grep -qF 'value: /data/tmp' ||
