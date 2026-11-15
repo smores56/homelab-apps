@@ -16,10 +16,10 @@ resources:
 # fields, and kustomize renders `repo:build-<n>@sha256:...` into every occurrence
 # (the agent container and the prepare-tools init container).
 images:
-  - name: ghcr.io/smores56/homelabs-platform/nanobot
-    newName: ghcr.io/smores56/homelabs-platform/nanobot # {"$imagepolicy": "flux-system:nanobot:name"}
-    newTag: build-7 # {"$imagepolicy": "flux-system:nanobot:tag"}
-    digest: sha256:96357801dc2f06366c08ecb43bf52cb45686bdb64bb3cd38076a2940a72bb455 # {"$imagepolicy": "flux-system:nanobot:digest"}
+  - name: ghcr.io/smores56/homelab-platform/nanobot
+    newName: ghcr.io/smores56/homelab-platform/nanobot # {"$imagepolicy": "flux-system:nanobot:name"}
+    newTag: build-9 # {"$imagepolicy": "flux-system:nanobot:tag"}
+    digest: sha256:26841baa02bdf34f095056c002b5c2e50e16ccb75b7fc28f72ba596c616a201d # {"$imagepolicy": "flux-system:nanobot:digest"}
 # `namespace.yaml` and `networkpolicy.yaml` are deliberately absent: the
 # Namespace is cluster-scoped, and NetworkPolicies are platform-owned so the
 # tenant cannot widen its own isolation (the tenant Role denies them). Both
