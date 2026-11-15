@@ -50,13 +50,14 @@ spec:
           command:
             - mkdir
             - -p
+            - /data/home
             - /data/tmp
-            - /data/home/tools/bin
-            - /data/home/tools/uv
-            - /data/home/tools/py
-            - /data/home/tools/npm
-            - /data/home/tools/cargo
-            - /data/home/tools/go
+            - /data/tools/bin
+            - /data/tools/uv
+            - /data/tools/py
+            - /data/tools/npm
+            - /data/tools/cargo
+            - /data/tools/go
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
@@ -67,7 +68,7 @@ spec:
             - name: scratch
               mountPath: /data
             - name: tools
-              mountPath: /data/home/tools
+              mountPath: /data/tools
       containers:
         - name: nanobot
           # Built and published by the trusted workflow in homelab-platform.
@@ -124,21 +125,21 @@ spec:
             # a restart and a fresh image; /opt/nanobot/bin stays on PATH because
             # it holds the image's interpreter and the entrypoint execs `nanobot`.
             - name: PATH
-              value: /data/home/tools/bin:/opt/nanobot/bin:/usr/local/bin:/usr/local/sbin:/usr/sbin:/usr/bin:/sbin:/bin
+              value: /data/tools/bin:/opt/nanobot/bin:/usr/local/bin:/usr/local/sbin:/usr/sbin:/usr/bin:/sbin:/bin
             - name: UV_TOOL_DIR
-              value: /data/home/tools/uv
+              value: /data/tools/uv
             - name: UV_TOOL_BIN_DIR
-              value: /data/home/tools/bin
+              value: /data/tools/bin
             - name: PIP_USER
               value: "1"
             - name: PYTHONUSERBASE
-              value: /data/home/tools/py
+              value: /data/tools/py
             - name: NPM_CONFIG_PREFIX
-              value: /data/home/tools/npm
+              value: /data/tools/npm
             - name: CARGO_HOME
-              value: /data/home/tools/cargo
+              value: /data/tools/cargo
             - name: GOPATH
-              value: /data/home/tools/go
+              value: /data/tools/go
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
@@ -191,7 +192,7 @@ spec:
             - name: books
               mountPath: /data/books
             - name: tools
-              mountPath: /data/home/tools
+              mountPath: /data/tools
             # Kept for the programs that hardcode /tmp instead of reading
             # TMPDIR; the rootfs is read-only, so without it they fail outright.
             - name: tmp

@@ -190,14 +190,14 @@ every install root sits on the `nanobot-tools` PVC so it survives a restart:
 
 | Variable | Value |
 | --- | --- |
-| `PATH` | `/data/home/tools/bin:/opt/nanobot/bin:/usr/local/bin:/usr/local/sbin:/usr/sbin:/usr/bin:/sbin:/bin` |
-| `UV_TOOL_DIR` | `/data/home/tools/uv` |
-| `UV_TOOL_BIN_DIR` | `/data/home/tools/bin` |
+| `PATH` | `/data/tools/bin:/opt/nanobot/bin:/usr/local/bin:/usr/local/sbin:/usr/sbin:/usr/bin:/sbin:/bin` |
+| `UV_TOOL_DIR` | `/data/tools/uv` |
+| `UV_TOOL_BIN_DIR` | `/data/tools/bin` |
 | `PIP_USER` | `1` |
-| `PYTHONUSERBASE` | `/data/home/tools/py` |
-| `NPM_CONFIG_PREFIX` | `/data/home/tools/npm` |
-| `CARGO_HOME` | `/data/home/tools/cargo` |
-| `GOPATH` | `/data/home/tools/go` |
+| `PYTHONUSERBASE` | `/data/tools/py` |
+| `NPM_CONFIG_PREFIX` | `/data/tools/npm` |
+| `CARGO_HOME` | `/data/tools/cargo` |
+| `GOPATH` | `/data/tools/go` |
 | `TMPDIR` | `/data/tmp` (scratch PVC, not the 64Mi memory emptyDir) |
 
 `/opt/nanobot/bin` stays on `PATH` ahead of the system directories: it holds the

@@ -61,7 +61,7 @@ The mounts split by owner:
 | Skills and cron | tenant `nanobot-config` ConfigMap | `/etc/nanobot/skills`, `/etc/nanobot/cron` |
 | Library | PVC `nanobot-books` over platform PV `nanobot-books-data` (`/mnt/data/books`, the Calibre share) | `/data/books` (`BOOK_SHELF`) |
 | Scratch | PVC `nanobot-scratch` | `/data/home` (`HOME`), `/data/outbox`, `/data/tmp` (`TMPDIR`) |
-| Toolchain | PVC `nanobot-tools` (a trust boundary: runtime installs, wiped to reset) | `/data/home/tools` (`PATH`, `UV_TOOL_DIR`, `PIP_USER`/`PYTHONUSERBASE`, `NPM_CONFIG_PREFIX`, `CARGO_HOME`, `GOPATH`) |
+| Toolchain | PVC `nanobot-tools` (a trust boundary: runtime installs, wiped to reset) | `/data/tools` (`PATH`, `UV_TOOL_DIR`, `PIP_USER`/`PYTHONUSERBASE`, `NPM_CONFIG_PREFIX`, `CARGO_HOME`, `GOPATH`) |
 
 The seams themselves:
 
