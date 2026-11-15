@@ -124,7 +124,7 @@ gh api repos/smores56/homelab-apps/rulesets
 
 Every ruleset lists the repository Admin role as a bypass actor (the script also
 adds `smores56` explicitly), so the owner's local commits still land directly;
-`homelab-agent` has no bypass. In the agent-writable tier the agent pushes
+`smores56-homelab-agent` has no bypass. In the agent-writable tier the agent pushes
 `main` directly and CI reports on the result. In the review tier its work lands
 on `agent/*` and stops at the PR.
 `smores56/sdlc` is private on a free plan, where the rulesets API answers 403

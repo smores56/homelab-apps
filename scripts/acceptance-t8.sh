@@ -10,7 +10,7 @@
 #     bash scripts/acceptance-t8.sh
 #
 # Preconditions: homelab-platform docs/manual-steps.md steps 1 and 10 (the
-# homelab-agent app installed, its files in the broker Secret). The PR
+# smores56-homelab-agent app installed, its files in the broker Secret). The PR
 # and its branch are deleted afterwards.
 set -euo pipefail
 
@@ -32,7 +32,7 @@ done
 
 stamp=$(date -u +%Y%m%dT%H%M%SZ)
 branch="agent/acceptance-${stamp}"
-identity=(-c user.name='homelab-agent[bot]' -c user.email='356043151+homelab-agent[bot]@users.noreply.github.com')
+identity=(-c user.name='smores56-homelab-agent[bot]' -c user.email='356043151+smores56-homelab-agent[bot]@users.noreply.github.com')
 work=$(mktemp -d)
 cleanup() { rm -rf "$work"; }
 trap cleanup EXIT

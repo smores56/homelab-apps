@@ -9,7 +9,7 @@
 # write was refused.
 #
 # The owner and the repository Admin role are always bypass actors, so a local
-# commit by smores56 still lands directly. homelab-agent has no bypass: it
+# commit by smores56 still lands directly. smores56-homelab-agent has no bypass: it
 # pushes main only where the tier says agent-writable.
 set -euo pipefail
 

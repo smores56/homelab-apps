@@ -3,7 +3,7 @@
 Steps only the owner can do. Each one names its verification; nothing here is
 optional for the agent to work.
 
-## 1. Create the `homelab-agent` GitHub App
+## 1. Create the `smores56-homelab-agent` GitHub App
 
 There is no machine user and no PAT for the agent. The identity is the app;
 `homelab-platform` owns the one-time creation steps (its
@@ -15,14 +15,14 @@ the rulesets described in step 6.
 platform writes go through the broker's `github-platform-push` logical host,
 with the token the broker holds.
 
-Verify: `gh api "/users/homelab-agent%5Bbot%5D"` returns the bot user; the
+Verify: `gh api "/users/smores56-homelab-agent%5Bbot%5D"` returns the bot user; the
 acceptance script probes both refusals (outside `agent/*`, and a workflow
 edit); and
 `gh api repos/smores56/homelab-apps/installation` lists the installation.
 
 ## 2. Supply the app to the broker
 
-The broker mints installation tokens from `homelab-agent`; the agent
+The broker mints installation tokens from `smores56-homelab-agent`; the agent
 holds none. Put the app id, the private key and the installation id in the
 platform broker Secret (`homelab-platform` `docs/manual-steps.md` step 10).
 Nothing enters this repository.
