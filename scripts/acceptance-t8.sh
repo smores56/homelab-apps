@@ -2,15 +2,15 @@
 # T8 acceptance test (smores56/sdlc#582), run inside the nanobot pod.
 #
 # Proves the whole path end to end: the broker injects the Neuralwatt key, git
-# pushes reach homelabs-apps, an agent/* branch reaches homelabs-platform, and a
+# pushes reach homelab-apps, an agent/* branch reaches homelab-platform, and a
 # same-repo pull request opens - all without the agent holding a credential. The
 # broker mints GitHub App installation tokens; this process never sees one.
 #
 #   cluster-kubectl -n tenant-apps exec deploy/nanobot -- \
 #     bash scripts/acceptance-t8.sh
 #
-# Preconditions: homelabs-platform docs/manual-steps.md steps 1 and 10 (the
-# homelabs-agent app installed, its files in the broker Secret). The PR
+# Preconditions: homelab-platform docs/manual-steps.md steps 1 and 10 (the
+# homelab-agent app installed, its files in the broker Secret). The PR
 # and its branch are deleted afterwards.
 set -euo pipefail
 
@@ -32,7 +32,7 @@ done
 
 stamp=$(date -u +%Y%m%dT%H%M%SZ)
 branch="agent/acceptance-${stamp}"
-identity=(-c user.name='homelabs-agent[bot]' -c user.email='356043151+homelabs-agent[bot]@users.noreply.github.com')
+identity=(-c user.name='homelab-agent[bot]' -c user.email='356043151+homelab-agent[bot]@users.noreply.github.com')
 work=$(mktemp -d)
 cleanup() { rm -rf "$work"; }
 trap cleanup EXIT
@@ -43,29 +43,29 @@ say "== neuralwatt"
 code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 30 "$BROKER_URL/neuralwatt/v1/models")
 [[ $code == 200 ]] || fail "neuralwatt returned $code (expected 200)"
 
-# 2. Push a marker branch to homelabs-apps through github-apps. The commit
+# 2. Push a marker branch to homelab-apps through github-apps. The commit
 # touches docs/ only, so a merge would not change the applied tree.
-say "== push to homelabs-apps"
+say "== push to homelab-apps"
 git init -q "$work/apps"
 git -C "$work/apps" checkout -q -b "$branch"
 mkdir -p "$work/apps/docs/acceptance"
 printf 'broker acceptance %s\n' "$stamp" >"$work/apps/docs/acceptance/$stamp.md"
 git -C "$work/apps" add "docs/acceptance/$stamp.md"
 git -C "$work/apps" "${identity[@]}" commit -q -m "test: broker acceptance $stamp"
-git -C "$work/apps" remote add broker "$BROKER_URL/github-apps/smores56/homelabs-apps.git"
+git -C "$work/apps" remote add broker "$BROKER_URL/github-apps/smores56/homelab-apps.git"
 git -C "$work/apps" push -q broker "$branch"
 say "pushed $branch"
 
-# 3. The same branch in homelabs-platform, through github-platform-push. The
+# 3. The same branch in homelab-platform, through github-platform-push. The
 # ruleset admits the app only on agent/*.
-say "== push an agent branch to homelabs-platform"
-git clone -q "$BROKER_URL/github-platform-push/smores56/homelabs-platform.git" "$work/platform"
+say "== push an agent branch to homelab-platform"
+git clone -q "$BROKER_URL/github-platform-push/smores56/homelab-platform.git" "$work/platform"
 git -C "$work/platform" checkout -q -b "$branch"
 mkdir -p "$work/platform/docs/acceptance"
 printf 'broker acceptance %s\n' "$stamp" >"$work/platform/docs/acceptance/$stamp.md"
 git -C "$work/platform" add "docs/acceptance/$stamp.md"
 git -C "$work/platform" "${identity[@]}" commit -q -m "test: broker acceptance $stamp"
-git -C "$work/platform" remote set-url origin "$BROKER_URL/github-platform-push/smores56/homelabs-platform.git"
+git -C "$work/platform" remote set-url origin "$BROKER_URL/github-platform-push/smores56/homelab-platform.git"
 git -C "$work/platform" push -q origin "$branch"
 
 # 4. Open the same-repo pull request through github-platform, then close it and
@@ -76,7 +76,7 @@ response=$(curl -sS --max-time 30 -X POST \
   -H 'Accept: application/vnd.github+json' \
   -H 'Content-Type: application/json' \
   --data "$payload" \
-  "$BROKER_URL/github-platform/repos/smores56/homelabs-platform/pulls")
+  "$BROKER_URL/github-platform/repos/smores56/homelab-platform/pulls")
 number=""
 # The image has no grep; parse the JSON with bash's own regex.
 if [[ $response =~ \"number\"[[:space:]]*:[[:space:]]*([0-9]+) ]]; then
@@ -89,7 +89,7 @@ curl -sS --max-time 30 -X PATCH \
   -H 'Accept: application/vnd.github+json' \
   -H 'Content-Type: application/json' \
   --data '{"state":"closed"}' \
-  "$BROKER_URL/github-platform/repos/smores56/homelabs-platform/pulls/$number" >/dev/null
+  "$BROKER_URL/github-platform/repos/smores56/homelab-platform/pulls/$number" >/dev/null
 say "closed pull request #$number"
 
 # 5. Negative probes. A success here means a control disappeared, so the run
@@ -118,10 +118,10 @@ say "refused: $(head -c 200 "$work/probe2.err")"
 # 6. Clean up the branches over the git transport. A failed delete is reported,
 # not fatal: the PR is already closed and a leftover branch is visible in Git.
 if ! git -C "$work/apps" push -q broker ":$branch"; then
-  say "warning: could not delete $branch from homelabs-apps"
+  say "warning: could not delete $branch from homelab-apps"
 fi
 if ! git -C "$work/platform" push -q origin ":$branch"; then
-  say "warning: could not delete $branch from homelabs-platform"
+  say "warning: could not delete $branch from homelab-platform"
 fi
 
 say "PASS: model call, apps push, agent branch and same-repo PR through the broker"

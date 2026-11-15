@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Guidance for agents working in `homelabs-apps`. This repository *is* the agent's
+Guidance for agents working in `homelab-apps`. This repository *is* the agent's
 write path: nanobot changes the cluster by committing here, and Flux applies it.
 
 ## Classification
@@ -38,7 +38,7 @@ an internal service: the broker is an HTTP API
 `HTTP_PROXY`. The network contract also allows direct public 80/443 with every
 private, CGNAT, metadata, loopback and ULA range excepted, so a download needs
 no rule; a service that needs a secret is still a broker enrollment in
-`homelabs-platform`, not a new rule here. `scripts/policy-scan.sh` rejects a
+`homelab-platform`, not a new rule here. `scripts/policy-scan.sh` rejects a
 config file that names a real upstream or asks for a proxy.
 
 ## Conventions

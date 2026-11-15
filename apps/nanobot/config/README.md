@@ -36,7 +36,7 @@ range). `BROKER_URL` is still the only address that carries a token.
 
 ## Image-side contract
 
-The image's entrypoint renders, on start (owned by `homelabs-platform`):
+The image's entrypoint renders, on start (owned by `homelab-platform`):
 
 1. `$HOME/.nanobot/config.json` — `providers.<neuralwatt>.api_base`,
    `agents.defaults` (provider, default model, context window, output cap) and
@@ -51,7 +51,7 @@ The image's entrypoint renders, on start (owned by `homelabs-platform`):
 
 Nothing below the mount is copied back into Git. Skills and cron are proposed by
 committing them here; the prompt and model catalog are changed only in
-`homelabs-platform`.
+`homelab-platform`.
 
 ## Rules for edits
 
@@ -60,7 +60,7 @@ committing them here; the prompt and model catalog are changed only in
   token for the agent to hold, including a broker token.
 - A model id comes from the Neuralwatt catalog in platform's
   `models/providers.yaml`; a tenant file cannot change it. New ids arrive in
-  `homelabs-platform`, not on their own.
+  `homelab-platform`, not on their own.
 - A cron entry stays under 20 lines, writes a file under `/data/outbox`
   (`delivery: {kind: file, path: /data/outbox/...}`; any other kind fails the
   start), and names a `model`. nanobot 0.4.1 has no per-job model override, so
@@ -70,7 +70,7 @@ committing them here; the prompt and model catalog are changed only in
   on the scratch PVC and **nothing reads it**: it is the agent's own scratch
   record, not a delivery channel. The cluster digest the cluster sends toward
   Kanbei is written by the platform CronJob (`cluster-digest` in
-  `homelabs-platform`) to the host's share and age-encrypted by the host writer;
+  `homelab-platform`) to the host's share and age-encrypted by the host writer;
   the agent neither produces nor consumes it.
 - A skill is one action, one `SKILL.md`, and any binary it needs must already
   exist in the image (`metadata.nanobot.requires.bins`). Every credentialed

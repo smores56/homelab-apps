@@ -3,32 +3,32 @@
 Steps only the owner can do. Each one names its verification; nothing here is
 optional for the agent to work.
 
-## 1. Create the `homelabs-agent` GitHub App
+## 1. Create the `homelab-agent` GitHub App
 
 There is no machine user and no PAT for the agent. The identity is the app;
-`homelabs-platform` owns the one-time creation steps (its
+`homelab-platform` owns the one-time creation steps (its
 `docs/manual-steps.md` step 1): permissions (Contents: read/write, Pull
-requests: read/write, Metadata: read), install on `homelabs-apps` **only**, and
+requests: read/write, Metadata: read), install on `homelab-apps` **only**, and
 the rulesets described in step 6.
 
-`homelabs-platform` is human-only: the app is not installed there. The agent's
+`homelab-platform` is human-only: the app is not installed there. The agent's
 platform writes go through the broker's `github-platform-push` logical host,
 with the token the broker holds.
 
-Verify: `gh api "/users/homelabs-agent%5Bbot%5D"` returns the bot user; the
+Verify: `gh api "/users/homelab-agent%5Bbot%5D"` returns the bot user; the
 acceptance script probes both refusals (outside `agent/*`, and a workflow
 edit); and
-`gh api repos/smores56/homelabs-apps/installation` lists the installation.
+`gh api repos/smores56/homelab-apps/installation` lists the installation.
 
 ## 2. Supply the app to the broker
 
-The broker mints installation tokens from `homelabs-agent`; the agent
+The broker mints installation tokens from `homelab-agent`; the agent
 holds none. Put the app id, the private key and the installation id in the
-platform broker Secret (`homelabs-platform` `docs/manual-steps.md` step 10).
+platform broker Secret (`homelab-platform` `docs/manual-steps.md` step 10).
 Nothing enters this repository.
 
 Verify: a call through `$BROKER_URL/github-platform/rate_limit` from the agent
-pod returns `200`; `$BROKER_URL/github-apps` can push to `homelabs-apps` but the
+pod returns `200`; `$BROKER_URL/github-apps` can push to `homelab-apps` but the
 platform scopes refuse every other repository.
 
 ## 3. The image digest is Flux's
@@ -51,7 +51,7 @@ build produces a Flux commit that rolls the Deployment.
 
 Platform already owns the namespace, the `nanobot` ServiceAccount, the gVisor
 and broker-hop admission policies, and the tenant `Kustomization`
-(`clusters/homelab/platform/tenants/homelabs-apps.yaml`). The first push is the
+(`clusters/homelab/platform/tenants/homelab-apps.yaml`). The first push is the
 wiring:
 
 1. From the repository checkout:
@@ -68,7 +68,7 @@ wiring:
    cluster-kubectl -n tenant-apps get sa nanobot
    cluster-kubectl get runtimeclass gvisor
    cluster-kubectl -n broker get svc broker
-   flux -n tenant-apps get kustomization homelabs-apps
+   flux -n tenant-apps get kustomization homelab-apps
    ```
 
 3. Confirm the render lands where intended (the tenant ServiceAccount cannot
@@ -80,7 +80,7 @@ wiring:
    ```
 
 Verify: both print `nanobot` and `gvisor`; `flux -n tenant-apps get
-kustomization homelabs-apps` reports `Applied`.
+kustomization homelab-apps` reports `Applied`.
 
 ## 5. Books share and the uid migration
 
@@ -100,10 +100,10 @@ both claims together while Flux is suspended, because a plain scale-down is
 reverted by the next reconcile:
 
 ```sh
-flux -n tenant-apps suspend kustomization homelabs-apps
+flux -n tenant-apps suspend kustomization homelab-apps
 cluster-kubectl -n tenant-apps scale deploy/nanobot --replicas=0
 cluster-kubectl -n tenant-apps delete pvc nanobot-scratch nanobot-tools
-flux -n tenant-apps resume kustomization homelabs-apps
+flux -n tenant-apps resume kustomization homelab-apps
 ```
 
 On resume Flux recreates both PVCs and the single replica, and the image renders
@@ -131,7 +131,7 @@ and is idempotent, so running it twice changes nothing.
 
 ```sh
 bash scripts/apply-merge-tiers.sh
-for repo in homelabs-apps nix-config kanbei homelabs-platform; do
+for repo in homelab-apps nix-config kanbei homelab-platform; do
   gh api "repos/smores56/$repo/rulesets" --jq '.[] | "\(.id) \(.name)"'
 done
 ```
@@ -142,9 +142,9 @@ classic branch protection either (also a Pro feature); the guard is the broker
 scope and the App installation.
 
 Current state, verified 2026-11-13: `nix-config` ruleset `27179536`, `kanbei`
-`27179584` and `homelabs-platform` `27170976` carry the PR tier with the Admin
+`27179584` and `homelab-platform` `27170976` carry the PR tier with the Admin
 role as the bypass actor (`current_user_can_bypass: always`), so the owner's
-direct pushes are unaffected. `homelabs-apps` and `sdlc` have no `main` ruleset:
+direct pushes are unaffected. `homelab-apps` and `sdlc` have no `main` ruleset:
 the token available from this checkout reads rulesets but every write is refused
 with 403 (`Resource not accessible by personal access token`), and `sdlc`
 additionally answers 403 for its plan. Nothing was applied from this checkout;
@@ -157,7 +157,7 @@ includes the Admin role, and a direct push by the owner still lands.
 
 ## 7. Broker, tunnel and the acceptance run
 
-1. Broker logical hosts are enrolled in `homelabs-platform`
+1. Broker logical hosts are enrolled in `homelab-platform`
    (`clusters/homelab/broker/config/broker.json`): `neuralwatt`, `github-apps`,
    `github-platform-push`, `github-platform`, `tinyfish`, `loki`, `status`.
    `agent.sammohr.dev` is not a logical host and must never appear in an
@@ -165,7 +165,7 @@ includes the Admin role, and a direct push by the owner still lands.
 2. The tunnel rule admits pods labelled `app.kubernetes.io/name: cloudflared` in
    namespace `ingress` on port 8080, and the Access application for
    `agent.sammohr.dev` uses the owner's identity plus a service token for maki
-   (`homelabs-platform` `docs/broker.md`, "OpenTofu fragment").
+   (`homelab-platform` `docs/broker.md`, "OpenTofu fragment").
 3. No Cloudflare token is copied into this repository or the pod. The tunnel
    token lives in the `ingress` namespace.
 4. Run the acceptance test from inside the pod:

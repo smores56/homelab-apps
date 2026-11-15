@@ -16,8 +16,8 @@ every private range, so there is nothing internal to reach that way.
 | Logical host | What it is |
 |---|---|
 | `neuralwatt` | the model API (`/v1/...`) |
-| `github-apps` | git smart HTTP for `smores56/homelabs-apps` |
-| `github-platform-push` | git smart HTTP for `smores56/homelabs-platform` (`agent/*` branches only) |
+| `github-apps` | git smart HTTP for `smores56/homelab-apps` |
+| `github-platform-push` | git smart HTTP for `smores56/homelab-platform` (`agent/*` branches only) |
 | `github-platform` | the GitHub REST API for pull-request calls |
 | `tinyfish` | TinyFish search (`?query=...`) |
 | `loki` | the read-only LogQL gateway for the `data` tenant |

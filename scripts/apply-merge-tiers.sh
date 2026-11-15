@@ -9,7 +9,7 @@
 # write was refused.
 #
 # The owner and the repository Admin role are always bypass actors, so a local
-# commit by smores56 still lands directly. homelabs-agent has no bypass: it
+# commit by smores56 still lands directly. homelab-agent has no bypass: it
 # pushes main only where the tier says agent-writable.
 set -euo pipefail
 
@@ -128,7 +128,7 @@ apply() { # repo body
 
 # agent-writable: the agent pushes main directly and CI reports on the result.
 apply sdlc "$(agent_writable_body)"
-apply homelabs-apps "$(agent_writable_body)"
+apply homelab-apps "$(agent_writable_body)"
 
 # human review: the agent's work lands on agent/* and stops at the PR.
 apply nix-config "$(review_body false false)"
@@ -136,7 +136,7 @@ apply kanbei "$(review_body true true)"
 
 # human only: no agent installation and no agent broker scope; the ruleset only
 # records that main takes a PR even for other collaborators.
-apply homelabs-platform "$(review_body false false)"
+apply homelab-platform "$(review_body false false)"
 
 printf '\napplied=%d skipped=%d failed=%d\n' "$applied" "$skipped" "$failed"
 [ "$failed" -eq 0 ]

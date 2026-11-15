@@ -1,17 +1,17 @@
-# homelabs-apps
+# homelab-apps
 
 The tenant half of the home cluster's GitOps split. Flux reconciles this
 repository as an **unprivileged tenant** into the `tenant-apps` namespace, which
 is where the cluster administrator agent lives. It can change what runs; it
 cannot see what the cluster stores.
 
-Machine counterpart: `smores56/homelabs-platform` (Flux bootstrap, namespaces,
+Machine counterpart: `smores56/homelab-platform` (Flux bootstrap, namespaces,
 RBAC, admission policy, network policy, SOPS/ESO, the broker, data-bearing apps,
 cluster tunnel). Humans merge there; this repository is agent-writable.
 
 ## Tenant model
 
-Flux's tenant `Kustomization` lives in `homelabs-platform`, points `spec.path` at
+Flux's tenant `Kustomization` lives in `homelab-platform`, points `spec.path` at
 `deploy`, sets `spec.targetNamespace: tenant-apps`, and impersonates the
 `tenant-apps-reconciler` ServiceAccount. The platform owns the `nanobot`
 ServiceAccount in that namespace and binds it to nothing but read-only debug
@@ -24,7 +24,7 @@ That bound is structural, and `scripts/policy-scan.sh` enforces it on every push
   resources; `hostPath`, `hostNetwork`, `hostPID`, `hostIPC`; privileged pods;
   a runtime class other than `gvisor`; any pod in another namespace.
 - **Data namespaces are out of reach:** Immich, Navidrome, Calibre, Graphiti and
-  their PVCs, credentials and logs belong to `homelabs-platform`. The agent
+  their PVCs, credentials and logs belong to `homelab-platform`. The agent
   proposes diffs; a human applies them.
 - **Credentials never live here, and the agent holds none.** Every outbound
   request goes to the broker (`BROKER_URL`) in the `broker` namespace. The
@@ -71,7 +71,7 @@ The seams themselves:
 | Agent identity | ServiceAccount `nanobot` in `tenant-apps`, no token automount, no API route |
 | Runtime | `RuntimeClass gvisor` (containerd handler `runsc`); absence fails admission |
 | Broker | `BROKER_URL=http://broker.broker.svc.cluster.local:8080`, pods labelled `app.kubernetes.io/name: broker` in tier `broker` |
-| Logical hosts | `neuralwatt`, `github-apps`, `github-platform-push`, `github-platform`, `tinyfish`, `loki`, `status` (`docs/broker.md` in `homelabs-platform`) |
+| Logical hosts | `neuralwatt`, `github-apps`, `github-platform-push`, `github-platform`, `tinyfish`, `loki`, `status` (`docs/broker.md` in `homelab-platform`) |
 | DNS | CoreDNS in `kube-system`, pods labelled `k8s-app: kube-dns` |
 | Public egress | direct 80/443; private, CGNAT, metadata, loopback and ULA ranges refused (`networkpolicy.yaml`) |
 | Ingress | pods labelled `app.kubernetes.io/name: cloudflared` in namespace `ingress` (Cloudflare Access in front of `agent.sammohr.dev`) |
@@ -111,20 +111,20 @@ ruleset ids) is in `docs/manual-steps.md` step 6.
 
 ```sh
 bash scripts/apply-merge-tiers.sh
-gh api repos/smores56/homelabs-apps/rulesets
+gh api repos/smores56/homelab-apps/rulesets
 ```
 
 | Repository | Tier | Effective rule |
 |---|---|---|
 | `smores56/sdlc` | agent-writable | recorded; the free plan refuses rulesets, so the guard is the broker scope |
-| `smores56/homelabs-apps` | agent-writable | same as `sdlc` |
+| `smores56/homelab-apps` | agent-writable | same as `sdlc` |
 | `smores56/nix-config` | human review | `main` requires a PR and one approving review |
 | `smores56/kanbei` | human review | same, plus Code Owners and unattributed-change approvals |
-| `smores56/homelabs-platform` | human only | no agent installation and no agent broker scope; `main` requires a PR and one review |
+| `smores56/homelab-platform` | human only | no agent installation and no agent broker scope; `main` requires a PR and one review |
 
 Every ruleset lists the repository Admin role as a bypass actor (the script also
 adds `smores56` explicitly), so the owner's local commits still land directly;
-`homelabs-agent` has no bypass. In the agent-writable tier the agent pushes
+`homelab-agent` has no bypass. In the agent-writable tier the agent pushes
 `main` directly and CI reports on the result. In the review tier its work lands
 on `agent/*` and stops at the PR.
 `smores56/sdlc` is private on a free plan, where the rulesets API answers 403

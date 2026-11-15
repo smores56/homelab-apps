@@ -11,7 +11,7 @@ through the broker, which injects the token; the URL is the logical host plus
 the repository path.
 
 ```sh
-git clone "$BROKER_URL/github-apps/smores56/homelabs-apps.git" repo
+git clone "$BROKER_URL/github-apps/smores56/homelab-apps.git" repo
 cd repo
 ```
 
@@ -28,18 +28,18 @@ cd repo
    ```sh
    git add -A apps/
    git commit -m "fix(nanobot): <what changed and why>"
-   git push "$BROKER_URL/github-apps/smores56/homelabs-apps.git" HEAD:main
+   git push "$BROKER_URL/github-apps/smores56/homelab-apps.git" HEAD:main
    ```
 
 5. Watch the commit, not the logs: CI on `main` re-runs the same checks, and a
    red run means revert first and diagnose second.
 
 A platform change is a pull request, not a push: clone
-`$BROKER_URL/github-platform-push/smores56/homelabs-platform.git`, commit on an
+`$BROKER_URL/github-platform-push/smores56/homelab-platform.git`, commit on an
 `agent/<topic>` branch, push it to the same URL, then POST the pull request to
-`$BROKER_URL/github-platform/repos/smores56/homelabs-platform/pulls` with that
+`$BROKER_URL/github-platform/repos/smores56/homelab-platform/pulls` with that
 branch as `head` (same repository). The identity is the
-`homelabs-agent` app: the broker mints a short-lived, scoped token, so
+`homelab-agent` app: the broker mints a short-lived, scoped token, so
 you never see one. Never push to any branch outside `agent/*`; the ruleset
 refuses it. Anything that needs a Secret, a
 namespace, RBAC, a Flux resource, a cluster-scoped object, a new image build, or

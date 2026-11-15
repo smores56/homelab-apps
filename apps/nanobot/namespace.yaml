@@ -9,10 +9,10 @@ kind: Namespace
 metadata:
   name: tenant-apps
   labels:
-    app.kubernetes.io/part-of: homelabs
-    homelabs.dev/tenant: apps
-    homelabs.dev/tier: tenant
-    homelabs.dev/managed-by: tenant
+    app.kubernetes.io/part-of: homelab
+    homelab.dev/tenant: apps
+    homelab.dev/tier: tenant
+    homelab.dev/managed-by: tenant
     pod-security.kubernetes.io/enforce: restricted
     pod-security.kubernetes.io/audit: restricted
     pod-security.kubernetes.io/warn: restricted

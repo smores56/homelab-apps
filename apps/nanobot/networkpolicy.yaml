@@ -1,6 +1,6 @@
 # Reviewed network contract, not part of the build: the tenant ServiceAccount
 # may not write NetworkPolicies (the agent must not be able to widen its own
-# isolation). homelabs-platform owns the live objects and applies them from its
+# isolation). homelab-platform owns the live objects and applies them from its
 # network stage; this file is what that stage must match, and a change here is
 # only real once platform has merged the matching change.
 #
@@ -56,7 +56,7 @@ spec:
     - to:
         - namespaceSelector:
             matchLabels:
-              homelabs.dev/tier: broker
+              homelab.dev/tier: broker
           podSelector:
             matchLabels:
               app.kubernetes.io/name: broker
