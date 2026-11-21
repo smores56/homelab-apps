@@ -69,9 +69,8 @@ without narrowing any path. Recorded as a delta on SDLC #726.
 app-only PR therefore needs no human approval and auto-merges once the check
 passes; a PR that edits the check or the recipient list cannot.
 
-Two parts of the design's merge contract are not in force yet, and are recorded
-as deltas on SDLC #726: required signed commits (no unattended signing key
-exists, and every commit in both repositories is currently unsigned) and the
-broker's ability to open a PR here (its GitHub App holds `contents: write` for
-this repository but no `pull_requests: write`, so the agent's only reachable
-path is the direct push the PR rule now forbids).
+Signed commits are not required: the agent merges unattended, so a signature
+would attest to a key on the machine, not to human approval. What is still
+missing is the broker's ability to open a PR here — its GitHub App holds
+`contents: write` for this repository but no `pull_requests: write` — so until
+that is granted the agent cannot open the PR the rule requires.
