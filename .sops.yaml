@@ -1,13 +1,17 @@
 # The tenant SOPS file holds this repository's app secrets and nothing else.
 #
-# Every recipient here is a platform recipient: the shared machine identity the
-# deploy decrypts with, the operator's own key and the three YubiKeys. The
-# tenant identity the design originally named is deliberately not used — the
-# apply step runs as root on smortress and already holds the machine identity,
-# so a separate key would add a second secret to protect without narrowing that
-# path. The delta is recorded on SDLC #726.
+# Every recipient here is a platform recipient, in the platform's order: the
+# operator's own key, the shared machine identity the deploy decrypts with, and
+# the three YubiKeys. The tenant identity the design originally named is
+# deliberately not used — the apply step runs as root on smortress and already
+# holds the machine identity, so a separate key would add a second secret to
+# protect without narrowing that path. The delta is recorded on SDLC #726.
+#
+# `CODEOWNERS` names this file, because it decides who can decrypt everything
+# in `secrets.sops.json`; an agent that could append a recipient here could
+# widen that boundary without touching a definition.
 creation_rules:
-  - path_regex: secrets\.json$
+  - path_regex: secrets\.sops\.json$
     key_groups:
       - age:
           - age1skuwunreduvw8gtkzyf9atsyjnku388ly8c252h3qger84fg5d7q4kf6xs

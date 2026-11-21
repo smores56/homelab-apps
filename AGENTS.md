@@ -7,7 +7,7 @@ human review and is what the tenant runs.
 ## What may live here
 
 - `apps/<name>/app.toml` — one typed definition per app.
-- `secrets.json` — the tenant SOPS file, values encrypted.
+- `secrets.sops.json` — the tenant SOPS file, values encrypted.
 - `README.md`, `AGENTS.md`, and `.github/`-owned files (which need a human).
 
 Never add a Quadlet, unit file, script, compose file, or manifest of any kind.
@@ -37,7 +37,7 @@ SELinux options. There is no field to widen containment, and adding one is a
 - `egress = "internet"` gets pasta networking behind the tenant's deny-first
   nftables table; `egress = "none"` gets the internal, routeless network.
 - `secrets` may name only entries under its own `apps.<name>` section of
-  `secrets.json`.
+  `secrets.sops.json`.
 
 ## Adding an app
 
@@ -49,15 +49,18 @@ SELinux options. There is no field to widen containment, and adding one is a
 3. Run the same check CI runs before pushing:
 
    ```sh
-   python3 ../homelab-platform/main/scripts/apps-schema.py validate \
-     --root . --secrets secrets.json
+   python3 ../homelab-platform/main/scripts/apps-schema.py render \
+     --root . --secrets secrets.sops.json --out /tmp/apps-render
    ```
 
-4. Push a branch, open a PR, and enable auto-merge.
+4. Push a branch, open a PR, and enable auto-merge. That path needs the broker's
+   GitHub App to hold `pull_requests: write` here, which it does not yet, and
+   the PR rule forbids a direct push to `main`: until that permission lands,
+   ask the operator to merge.
 
 ## Secrets
 
-Edit `secrets.json` with `sops` over the recipients in `.sops.yaml`; if you hold
+Edit `secrets.sops.json` with `sops` over the recipients in `.sops.yaml`; if you hold
 no identity, ask the operator for the ciphertext rather than inventing one. The
 file stays encrypted at every step, including in CI.
 

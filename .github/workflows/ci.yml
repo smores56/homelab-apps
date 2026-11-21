@@ -21,24 +21,32 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout the definitions
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
           persist-credentials: false
 
       # The validator is platform-owned and never vendored here: a copy an
       # agent could edit would make this check agree with whatever it checked.
-      # The pin is the reviewed SHA; smortress re-runs the same check from its
-      # own image before rendering, so this is fast feedback, not the boundary.
+      # The pin is the reviewed SHA. Both repositories are public, so this
+      # needs no credential and the workflow holds no secret a PR could
+      # exfiltrate. smortress re-runs the same check from its own image before
+      # rendering, so this is fast feedback, not the boundary.
       - name: Checkout the validator from homelab-platform
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
           repository: smores56/homelab-platform
           ref: fc6fb7082c001362ed84a71ed7ce002bf38df588
           path: .platform
-          token: ${{ secrets.PLATFORM_TOKEN }}
           persist-credentials: false
 
+      # Render, not only validate: the host renders before it applies, and a
+      # tree that validates but cannot render (a removed last app, a state the
+      # renderer refuses) must fail here, not on smortress with the previous
+      # revision still running.
+      #
       # The tenant SOPS file is passed still encrypted: the validator reads key
-      # names only, so no identity is needed here and no value is ever exposed.
+      # names only, so no identity is needed and no value is ever exposed.
       - name: apps schema checks
-        run: python3 .platform/scripts/apps-schema.py validate --root . --secrets secrets.json
+        run: |
+          python3 .platform/scripts/apps-schema.py render \
+            --root . --secrets secrets.sops.json --out "$RUNNER_TEMP/render"

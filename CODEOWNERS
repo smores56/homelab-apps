@@ -1,10 +1,11 @@
 # What the tenant may run, and who may decide it.
 
 # Everything that decides what the tenant is allowed to do is a platform
-# change, so these need a human: the check's own workflow, the ownership file,
-# and the schema vocabulary it validates against.
+# change, so these need a human: the check's own workflow and ownership file,
+# and the recipient list that decides who can decrypt the tenant's secrets.
 /.github/   @smores56
 /CODEOWNERS @smores56
+/.sops.yaml @smores56
 
 # App definitions and the tenant secrets are agent-manageable: the schema has
 # no field that can express a host path, a mount, a device, a capability, a

@@ -6,7 +6,7 @@ structural, not reviewed.
 
 This repository contains no Quadlets, unit files, scripts, or anything else
 smortress executes. It contains `apps/<name>/app.toml` and, when an app needs
-secrets, `secrets.json`.
+secrets, `secrets.sops.json`.
 
 ## A definition
 
@@ -29,21 +29,24 @@ the renderer, the network policy and the tenant account all live there.
 
 `apps-schema` runs `scripts/apps-schema.py` from `homelab-platform` at the SHA
 pinned in `.github/workflows/ci.yml`, never a vendored copy: a copy an agent
-could edit would make the check agree with whatever it checked. The pin needs a
-fine-grained token with `Contents: read` on `homelab-platform`, stored as the
-`PLATFORM_TOKEN` repository secret.
+could edit would make the check agree with whatever it checked. Both
+repositories are public, so the checkout is anonymous: the workflow holds no
+secret, and a PR that edits it has nothing to exfiltrate.
 
-The validator reads `secrets.json` still encrypted — SOPS encrypts values only,
+The validator reads `secrets.sops.json` still encrypted — SOPS encrypts values only,
 so key names are what it checks and no identity is needed in CI.
 
-The smortress deploy does not trust this check: it re-runs the same validator
-from its own image against the fetched commit before rendering.
+The check renders rather than only validating: the host renders before it
+applies, so a tree that validates but cannot render must fail in CI, not on
+smortress with the previous revision still running. The smortress deploy still
+does not trust this check — it re-runs the same validator from its own image
+against the fetched commit before rendering.
 
 ## Secrets
 
-`secrets.json` is a SOPS file over the platform recipients in `.sops.yaml`:
-the shared machine identity, the operator key and the three YubiKeys. Every
-value is overwritten; only the structure is plaintext.
+`secrets.sops.json` is a SOPS file over the platform recipients in `.sops.yaml`:
+the operator key, the shared machine identity and the three YubiKeys. Values are
+encrypted; only the structure is plaintext.
 
 ```json
 { "apps": { "smoke": { "db-password": "…" } } }
@@ -60,7 +63,15 @@ without narrowing any path. Recorded as a delta on SDLC #726.
 
 ## Merging
 
-`main` requires a PR, signed commits, the `apps-schema` check and code-owner
-review where `CODEOWNERS` names an owner — which is only `.github/**` and
-`CODEOWNERS` itself. An app-only PR therefore needs no human approval and
-auto-merges once the check passes; a PR that edits the check cannot.
+`main` requires a PR, the `apps-schema` check and code-owner review where
+`CODEOWNERS` names an owner — which is only `.github/**`, `CODEOWNERS` itself and
+`.sops.yaml`, the file that decides who can decrypt the tenant's secrets. An
+app-only PR therefore needs no human approval and auto-merges once the check
+passes; a PR that edits the check or the recipient list cannot.
+
+Two parts of the design's merge contract are not in force yet, and are recorded
+as deltas on SDLC #726: required signed commits (no unattended signing key
+exists, and every commit in both repositories is currently unsigned) and the
+broker's ability to open a PR here (its GitHub App holds `contents: write` for
+this repository but no `pull_requests: write`, so the agent's only reachable
+path is the direct push the PR rule now forbids).
