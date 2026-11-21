@@ -1,0 +1,9 @@
+# A second canary for the deploy proof: same pinned image and shape as `smoke`,
+# different name, so the renderer assigns its own loopback port, Serve path,
+# project id and quota. It exists to prove that one revision can add an app
+# (unit, secretless, quota, route) and a later one can remove it cleanly.
+image = "docker.io/traefik/whoami@sha256:c4717a8d1f0134a7444e24f881160e033991f23027c6c5a9a3f8fd22e70d1d44"
+port = 80
+egress = "none"
+quota = "1G"
+env = { TZ = "UTC", CANARY = "second" }
