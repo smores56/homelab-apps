@@ -1,0 +1,8 @@
+# The tenant canary: the smallest app that proves render -> rootless unit ->
+# Serve path -> project quota -> no-egress network. It writes nothing, needs no
+# secret and holds no data, so it can always be dropped and re-added.
+image = "docker.io/traefik/whoami@sha256:c4717a8d1f0134a7444e24f881160e033991f23027c6c5a9a3f8fd22e70d1d44"
+port = 80
+egress = "none"
+quota = "1G"
+env = { TZ = "UTC" }

@@ -1,75 +1,67 @@
 # AGENTS.md
 
-Guidance for agents working in `homelab-apps`. This repository *is* the agent's
-write path: nanobot changes the cluster by committing here, and Flux applies it.
-
-## Classification
-
-Every change is a tenant-manifest change: no SDLC funnel, no worktree, commit
-straight to `main` (this repo's `smores.flow` is `local` and `main` is the
-applied branch). One commit per concern; the commit is the rollout record.
+Guidance for agents working in `homelab-apps`. This repository is the agent's
+deploy path into the `apps` tenant on `smortress`: a change here merges without
+human review and is what the tenant runs.
 
 ## What may live here
 
-Only objects the tenant ServiceAccount can create inside `tenant-apps`:
-Deployments, Services, PVCs, ConfigMaps, NetworkPolicies.
+- `apps/<name>/app.toml` — one typed definition per app.
+- `secrets.json` — the tenant SOPS file, values encrypted.
+- `README.md`, `AGENTS.md`, and `.github/`-owned files (which need a human).
 
-Never add — CI fails and cluster admission rejects them anyway:
+Never add a Quadlet, unit file, script, compose file, or manifest of any kind.
+Nothing here is executed by the host; the platform renders definitions into
+rootless Podman units.
 
-- `Secret`, `ServiceAccount`, `Role`, `RoleBinding`, CRDs, or any RBAC,
-  admission, storage or scheduling API group;
-- cluster-scoped objects of any kind (`apps/nanobot/namespace.yaml` is a
-  contract copy that stays out of the build);
-- Flux custom resources, or anything that would change how this repo is
-  reconciled;
-- `hostPath`, `hostNetwork`, `hostPID`, `hostIPC`, privileged containers, a
-  runtime class other than `gvisor`;
-- credentials of any kind, including "placeholder" tokens, broker tokens,
-  Cloudflare tokens and encrypted blobs.
+## Classification
 
-Data-bearing namespaces are platform-owned. Do not read, copy or reference their
-Secrets, PVCs, logs, or service DNS names; propose a diff to the human instead.
+An app or secret change is a tenant change: no SDLC funnel, no worktree. Push a
+branch, let `apps-schema` pass, enable auto-merge, and let it land — the merge is
+the rollout record. A change to `.github/**` or `CODEOWNERS` is a platform
+change, needs `@smores56`, and should not be attempted autonomously.
 
-## Network
+## The vocabulary is closed
 
-`BROKER_URL` is the only address that carries a credential and the only route to
-an internal service: the broker is an HTTP API
-(`$BROKER_URL/<logical-host>/<path>`), not a forward proxy: no `CONNECT`, no
-`HTTP_PROXY`. The network contract also allows direct public 80/443 with every
-private, CGNAT, metadata, loopback and ULA range excepted, so a download needs
-no rule; a service that needs a secret is still a broker enrollment in
-`homelab-platform`, not a new rule here. `scripts/policy-scan.sh` rejects a
-config file that names a real upstream or asks for a proxy.
+`image`, `port`, `egress`, `quota`, `secrets`, `env`. Unknown keys are errors,
+at every level, and so are host paths, extra mounts, devices, capabilities,
+privileged mode, sockets, custom or host networks, published ports, users and
+SELinux options. There is no field to widen containment, and adding one is a
+`homelab-platform` change.
 
-## Conventions
+- `image` must be a repository path with `@sha256:<64 hex>` and no tag. Resolve
+  a digest with the registry API, not by guessing.
+- `port` is the container's own port; the platform assigns a loopback port and a
+  Serve path `/apps/<name>`. An app that cannot run under a subpath is not
+  deployable yet.
+- `egress = "internet"` gets pasta networking behind the tenant's deny-first
+  nftables table; `egress = "none"` gets the internal, routeless network.
+- `secrets` may name only entries under its own `apps.<name>` section of
+  `secrets.json`.
 
-- Images are digest-pinned (`@sha256:`); a tag alone fails the scan.
-- Pods stay `restricted`: non-root, read-only rootfs, `drop: [ALL]`,
-  `allowPrivilegeEscalation: false`, `runtimeClassName: gvisor`, no token
-  automount, `serviceAccountName: nanobot`.
-- NetworkPolicy is default-deny; a new dependency is a new rule in
-  `apps/nanobot/networkpolicy.yaml`, not a wider selector.
-- Config is declarative under `apps/nanobot/config/`; read its README before
-  adding a skill or cron entry. The prompt, model catalog and image source are
-  platform-owned and checked by `scripts/policy-scan.sh`.
-- Comments explain why a rule exists. Delete dead files instead of commenting
-  them out.
+## Adding an app
 
-## Verify
+1. `mkdir apps/<name>` and write `app.toml`. Lower-case letters, digits and
+   hyphens; the name becomes the Serve path, the data directory `/srv/apps/<name>`
+   and the unit name.
+2. Give it a `quota` if it stores data. It writes only under `/data`, which is
+   that directory, mounted `:Z` into its own SELinux MCS pair.
+3. Run the same check CI runs before pushing:
 
-```sh
-nix shell nixpkgs#kustomize nixpkgs#kubeconform nixpkgs#yamllint \
-  nixpkgs#shellcheck -c bash scripts/verify.sh
-```
+   ```sh
+   python3 ../homelab-platform/main/scripts/apps-schema.py validate \
+     --root . --secrets secrets.json
+   ```
 
-That is the exact CI job (`verify`). Do not push a commit you have not run it
-against. If `main` goes red, revert first and diagnose second. The live T8
-acceptance is `scripts/acceptance-t8.sh` inside the pod; it skips without
-`BROKER_URL` and needs no token.
+4. Push a branch, open a PR, and enable auto-merge.
 
-## Docs
+## Secrets
 
-`README.md` holds the tenant model and the platform seams; `docs/manual-steps.md`
-holds the steps only a human can do (GitHub App, credential files, image
-automation, merge tiers, storage migration, broker wiring, tunnel route). Keep
-both current when a seam moves; neither carries TODO/TBD items.
+Edit `secrets.json` with `sops` over the recipients in `.sops.yaml`; if you hold
+no identity, ask the operator for the ciphertext rather than inventing one. The
+file stays encrypted at every step, including in CI.
+
+## When a check fails
+
+`apps-schema` prints `apps/<name>/app.toml: <problem>`. Fix the definition; do
+not edit the workflow, the schema in `homelab-platform`, or `CODEOWNERS`.

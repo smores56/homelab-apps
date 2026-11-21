@@ -1,4 +1,4 @@
-name: ci
+name: apps-schema
 
 on:
   push:
@@ -11,25 +11,34 @@ permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ github.ref }}
+  group: apps-schema-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  verify:
-    name: verify
+  apps-schema:
+    name: apps-schema
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 10
     steps:
-      - name: Checkout
+      - name: Checkout the definitions
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
-      - name: Install Nix
-        uses: cachix/install-nix-action@91f6a0f59e94dfb2cfed0f4000f36a68ead1d20c # v31
+
+      # The validator is platform-owned and never vendored here: a copy an
+      # agent could edit would make this check agree with whatever it checked.
+      # The pin is the reviewed SHA; smortress re-runs the same check from its
+      # own image before rendering, so this is fast feedback, not the boundary.
+      - name: Checkout the validator from homelab-platform
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
-          extra_nix_config: |
-            experimental-features = nix-command flakes
-      - name: Verify
-        run: |
-          nix shell nixpkgs#kustomize nixpkgs#kubeconform nixpkgs#yamllint \
-            nixpkgs#shellcheck -c bash scripts/verify.sh
+          repository: smores56/homelab-platform
+          ref: fc6fb7082c001362ed84a71ed7ce002bf38df588
+          path: .platform
+          token: ${{ secrets.PLATFORM_TOKEN }}
+          persist-credentials: false
+
+      # The tenant SOPS file is passed still encrypted: the validator reads key
+      # names only, so no identity is needed here and no value is ever exposed.
+      - name: apps schema checks
+        run: python3 .platform/scripts/apps-schema.py validate --root . --secrets secrets.json
