@@ -1,0 +1,5 @@
+# CI and the tenant SOPS recipient list are human-owned: an app-only PR merges
+# by itself, while a PR that changes the check or who can decrypt tenant
+# secrets waits for the owner.
+/.github/    @smores56
+/.sops.yaml  @smores56
