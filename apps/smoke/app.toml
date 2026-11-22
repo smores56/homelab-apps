@@ -6,6 +6,4 @@ image = "docker.io/traefik/whoami@sha256:c4717a8d1f0134a7444e24f881160e033991f23
 port = 80
 egress = "none"
 quota = "1G"
-env = { TZ = "UTC" }
-
-# agent-tenant-pr-probe 20261122T211537Z
+env = { TZ = "UTC", DRAIN_PROOF = "20261122T2205Z" }
