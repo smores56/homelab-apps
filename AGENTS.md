@@ -64,6 +64,16 @@ Edit `secrets.sops.json` with `sops` over the recipients in `.sops.yaml`; if you
 no identity, ask the operator for the ciphertext rather than inventing one. The
 file stays encrypted at every step, including in CI.
 
+`.sops.yaml` is generated from the canonical policy in `dotfiles`:
+
+```sh
+python3 <dotfiles>/scripts/sops-policy.py render --profile apps --out .sops.yaml
+```
+
+The keyless recipient check runs from the pinned platform checkout once this
+repository's platform pin includes it. Do not vendor a checker here: a copy an
+agent could edit would agree with whatever it checked.
+
 ## When a check fails
 
 `apps-schema` prints `apps/<name>/app.toml: <problem>`. Fix the definition; do
