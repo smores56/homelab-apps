@@ -35,9 +35,12 @@ jobs:
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
           repository: smores56/homelab-platform
-          ref: fc6fb7082c001362ed84a71ed7ce002bf38df588
+          ref: 41522ec2f12782a552ea3fcd07c6c4bbac0f884b
           path: .platform
           persist-credentials: false
+
+      - name: SOPS policy
+        run: python3 .platform/scripts/sops-policy.py check --repo .
 
       # Render, not only validate: the host renders before it applies, and a
       # tree that validates but cannot render (a removed last app, a state the
